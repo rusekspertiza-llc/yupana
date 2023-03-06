@@ -1289,7 +1289,7 @@ class SqlParserTest extends AnyFlatSpec with Matchers with Inside with ParsedVal
   it should "produce error on unknown statements" in {
     errorMessage("INSERT 'foo' INTO table;") {
       case msg =>
-        msg should include("""Expect ("SELECT" | "UPSERT" | "SHOW" | "KILL" | "DELETE"), but got "INSERT""")
+        msg should include("""Expect ("SELECT" | "UPSERT" | "SHOW" | "KILL" | "DELETE" | "EXPLAIN"), but got "INSERT""")
     }
   }
 

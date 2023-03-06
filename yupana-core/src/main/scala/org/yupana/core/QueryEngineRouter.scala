@@ -16,9 +16,9 @@
 
 package org.yupana.core
 
-import org.yupana.api.query.{ Query, Result, SimpleResult }
+import org.yupana.api.query.{ Result, SimpleResult }
 import org.yupana.api.types.DataType
-import org.yupana.core.providers.{ UpdatesIntervalsProvider, JdbcMetadataProvider, QueryInfoProvider }
+import org.yupana.core.providers.{ JdbcMetadataProvider, QueryInfoProvider, UpdatesIntervalsProvider }
 import org.yupana.core.sql.SqlQueryProcessor
 import org.yupana.core.sql.parser._
 
@@ -32,10 +32,10 @@ class QueryEngineRouter(
   def query(sql: String, params: Map[Int, Value]): Either[String, Result] = {
     SqlParser.parse(sql) flatMap {
       case select: Select =>
-        val tsdbQuery: Either[String, Query] = sqlQueryProcessor.createQuery(select, params)
-        tsdbQuery flatMap { query =>
-          Right(timeSeriesQueryEngine.query(query))
-        }
+        sqlQueryProcessor.createQuery(select, params).map(timeSeriesQueryEngine.query)
+
+      case Explain(select) =>
+        sqlQueryProcessor.createQuery(select, params).map(timeSeriesQueryEngine.explain)
 
       case upsert: Upsert =>
         doUpsert(upsert, Seq(params))

@@ -21,6 +21,8 @@ import org.yupana.api.query.DataPoint
 import org.yupana.api.schema.{ Dimension, Schema }
 import org.yupana.core.dao.DictionaryProvider
 import org.yupana.core.model.UpdateInterval
+import org.yupana.core.utils.{ Explanation, Writer }
+import org.yupana.core.utils.Explanation.Explained
 import org.yupana.core.utils.metric.MetricQueryCollector
 import org.yupana.core.{ IteratorMapReducible, MapReducible }
 import org.yupana.hbase.HBaseUtils._
@@ -41,24 +43,24 @@ class TSDaoHBase(
       queryContext: InternalQueryContext,
       intervals: Seq[(Long, Long)],
       rangeScanDims: Iterator[Map[Dimension, Seq[_]]]
-  ): Iterator[HResult] = {
+  ): Explained[Iterator[HResult]] = {
 
     if (rangeScanDims.nonEmpty) {
-      rangeScanDims.flatMap { dimIds =>
+      Writer.flatTraverseIterator(rangeScanDims) { dimIds =>
         queryContext.metricsCollector.createScans.measure(intervals.size) {
-          intervals.flatMap {
+          Writer.flatTraverseIterator(intervals.iterator) {
             case (from, to) =>
               val filter = multiRowRangeFilter(queryContext.table, from, to, dimIds)
-              createScan(queryContext, filter, Seq.empty, from, to) match {
+              createScan(queryContext, filter, Seq.empty, from, to).map {
                 case Some(scan) =>
                   executeScan(connection, namespace, scan, queryContext, TSDaoHBaseBase.EXTRACT_BATCH_SIZE)
-                case None => Iterator.empty
+                case None => Iterator.empty[HResult]
               }
           }
         }
       }
     } else {
-      Iterator.empty
+      Explanation.of(Iterator.empty)
     }
   }
 

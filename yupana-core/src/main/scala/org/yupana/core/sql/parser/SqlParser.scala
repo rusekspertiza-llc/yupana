@@ -57,6 +57,9 @@ object SqlParser {
   private def valuesWord[_: P] = P(IgnoreCase("VALUES"))
   private def functionsWord[_: P] = P(IgnoreCase("FUNCTIONS"))
   private def forWord[_: P] = P(IgnoreCase("FOR"))
+
+  private def explainWord[_: P] = P(IgnoreCase("EXPLAIN"))
+
   private val keywords = Set(
     "select",
     "from",
@@ -296,7 +299,9 @@ object SqlParser {
       case (table, fields) => values(fields.size).map(vs => Upsert(table, fields, vs))
     }
 
-  def statement[_: P]: P[Statement] = P((select | upsert | show | kill | delete) ~ ";".? ~ End)
+  def explain[_: P]: P[Explain] = P(explainWord ~ "(" ~/ select ~ ")").map(Explain)
+
+  def statement[_: P]: P[Statement] = P((select | upsert | show | kill | delete | explain) ~ ";".? ~ End)
 
   def parse(sql: String): Either[String, Statement] = {
     fastparse.parse(sql.trim, statement(_)) match {

@@ -19,6 +19,7 @@ package org.yupana.core.dao
 import org.yupana.api.query.Expression.Condition
 import org.yupana.core.MapReducible
 import org.yupana.core.model.{ InternalQuery, InternalRow, InternalRowBuilder }
+import org.yupana.core.utils.Explanation.Explained
 import org.yupana.core.utils.metric.MetricQueryCollector
 
 trait TSReadingDao[Collection[_], IdType] {
@@ -26,7 +27,7 @@ trait TSReadingDao[Collection[_], IdType] {
       query: InternalQuery,
       valueDataBuilder: InternalRowBuilder,
       metricCollector: MetricQueryCollector
-  ): Collection[InternalRow]
+  ): Explained[Collection[InternalRow]]
 
   def mapReduceEngine(metricQueryCollector: MetricQueryCollector): MapReducible[Collection]
 

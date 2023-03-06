@@ -16,7 +16,7 @@ import org.yupana.core.model._
 import org.yupana.core.sql.SqlQueryProcessor
 import org.yupana.core.sql.parser.{ Select, SqlParser }
 import org.yupana.core.utils.metric._
-import org.yupana.core.utils.{ FlatAndCondition, SparseTable }
+import org.yupana.core.utils.{ Explanation, FlatAndCondition, SparseTable }
 import org.yupana.metrics.{ CombinedMetricReporter, QueryStates, Slf4jMetricReporter }
 import org.yupana.settings.Settings
 import org.yupana.utils.RussianTokenizer
@@ -151,12 +151,14 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .buildAndReset()
+          )
         )
       )
 
@@ -210,12 +212,14 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .set(dimension(TestDims.DIM_A), "test123")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .set(dimension(TestDims.DIM_A), "test123")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .buildAndReset()
+          )
         )
       )
 
@@ -263,11 +267,13 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 3d)
-            .set(dimension(TestDims.DIM_A), "test12")
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 3d)
+              .set(dimension(TestDims.DIM_A), "test12")
+              .buildAndReset()
+          )
         )
       )
 
@@ -319,15 +325,17 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .set(dimension(TestDims.DIM_A), "test42")
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(metric(TestTableFields.TEST_FIELD), 3d)
-            .set(dimension(TestDims.DIM_A), "test42")
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .set(dimension(TestDims.DIM_A), "test42")
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(metric(TestTableFields.TEST_FIELD), 3d)
+              .set(dimension(TestDims.DIM_A), "test42")
+              .buildAndReset()
+          )
         )
       )
 
@@ -381,19 +389,21 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test42")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test24")
-            .set(metric(TestTableFields.TEST_FIELD), 2d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test42")
-            .set(metric(TestTableFields.TEST_FIELD), 3d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test42")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test24")
+              .set(metric(TestTableFields.TEST_FIELD), 2d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test42")
+              .set(metric(TestTableFields.TEST_FIELD), 3d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -452,12 +462,14 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -511,12 +523,14 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -569,17 +583,19 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -626,31 +642,33 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -703,31 +721,33 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(metric(TestTableFields.TEST_FIELD), 2d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(metric(TestTableFields.TEST_FIELD), 2d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(metric(TestTableFields.TEST_FIELD), 2d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(metric(TestTableFields.TEST_FIELD), 2d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -770,10 +790,12 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(Time(qtime.plusHours(1))).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset(),
-          b.set(Time(qtime.plusHours(2))).set(metric(TestTableFields.TEST_FIELD), 10d).buildAndReset(),
-          b.set(Time(qtime.plusHours(3))).set(metric(TestTableFields.TEST_FIELD), 100d).buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(Time(qtime.plusHours(1))).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset(),
+            b.set(Time(qtime.plusHours(2))).set(metric(TestTableFields.TEST_FIELD), 10d).buildAndReset(),
+            b.set(Time(qtime.plusHours(3))).set(metric(TestTableFields.TEST_FIELD), 100d).buildAndReset()
+          )
         )
       )
 
@@ -807,10 +829,12 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(Time(qtime.plusHours(1))).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset(),
-          b.set(Time(qtime.plusHours(2))).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset(),
-          b.set(Time(qtime.plusHours(3))).set(metric(TestTableFields.TEST_FIELD), 3d).buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(Time(qtime.plusHours(1))).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset(),
+            b.set(Time(qtime.plusHours(2))).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset(),
+            b.set(Time(qtime.plusHours(3))).set(metric(TestTableFields.TEST_FIELD), 3d).buildAndReset()
+          )
         )
       )
 
@@ -858,11 +882,13 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1)).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset(),
-          b.set(time, Time(pointTime2)).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset(),
-          b.set(time, Time(pointTime1)).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset(),
-          b.set(time, Time(pointTime2)).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1)).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset(),
+            b.set(time, Time(pointTime2)).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset(),
+            b.set(time, Time(pointTime1)).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset(),
+            b.set(time, Time(pointTime2)).set(metric(TestTableFields.TEST_FIELD), 1d).buildAndReset()
+          )
         )
       )
 
@@ -954,27 +980,29 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -1055,7 +1083,7 @@ class TsdbTest
           *,
           NoMetricCollector
         )
-        .returning(Iterator.empty)
+        .returning(Explanation.of(Iterator.empty))
 
       val result = tsdb.query(query)
 
@@ -1127,7 +1155,7 @@ class TsdbTest
           *,
           NoMetricCollector
         )
-        .returning(Iterator.empty)
+        .returning(Explanation.of(Iterator.empty))
 
       val result = tsdb.query(query)
 
@@ -1219,17 +1247,19 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test13")
-            .set(dimension(TestDims.DIM_B), "test21")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test13")
-            .set(dimension(TestDims.DIM_B), "test21")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test13")
+              .set(dimension(TestDims.DIM_B), "test21")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test13")
+              .set(dimension(TestDims.DIM_B), "test21")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -1325,17 +1355,19 @@ class TsdbTest
           NoMetricCollector
         )
         .onCall((_, b, _) =>
-          Iterator(
-            b.set(time, Time(pointTime1))
-              .set(dimension(TestDims.DIM_A), "test13")
-              .set(dimension(TestDims.DIM_B), "test21")
-              .set(metric(TestTableFields.TEST_FIELD), 1d)
-              .buildAndReset(),
-            b.set(time, Time(pointTime2))
-              .set(dimension(TestDims.DIM_A), "test13")
-              .set(dimension(TestDims.DIM_B), "test21")
-              .set(metric(TestTableFields.TEST_FIELD), 1d)
-              .buildAndReset()
+          Explanation.of(
+            Iterator(
+              b.set(time, Time(pointTime1))
+                .set(dimension(TestDims.DIM_A), "test13")
+                .set(dimension(TestDims.DIM_B), "test21")
+                .set(metric(TestTableFields.TEST_FIELD), 1d)
+                .buildAndReset(),
+              b.set(time, Time(pointTime2))
+                .set(dimension(TestDims.DIM_A), "test13")
+                .set(dimension(TestDims.DIM_B), "test21")
+                .set(metric(TestTableFields.TEST_FIELD), 1d)
+                .buildAndReset()
+            )
           )
         )
 
@@ -1463,17 +1495,19 @@ class TsdbTest
           NoMetricCollector
         )
         .onCall((_, b, _) =>
-          Iterator(
-            b.set(time, Time(pointTime1))
-              .set(dimension(TestDims.DIM_A), "test13")
-              .set(dimension(TestDims.DIM_B), "test21")
-              .set(metric(TestTableFields.TEST_FIELD), 1d)
-              .buildAndReset(),
-            b.set(time, Time(pointTime2))
-              .set(dimension(TestDims.DIM_A), "test13")
-              .set(dimension(TestDims.DIM_B), "test21")
-              .set(metric(TestTableFields.TEST_FIELD), 1d)
-              .buildAndReset()
+          Explanation.of(
+            Iterator(
+              b.set(time, Time(pointTime1))
+                .set(dimension(TestDims.DIM_A), "test13")
+                .set(dimension(TestDims.DIM_B), "test21")
+                .set(metric(TestTableFields.TEST_FIELD), 1d)
+                .buildAndReset(),
+              b.set(time, Time(pointTime2))
+                .set(dimension(TestDims.DIM_A), "test13")
+                .set(dimension(TestDims.DIM_B), "test21")
+                .set(metric(TestTableFields.TEST_FIELD), 1d)
+                .buildAndReset()
+            )
           )
         )
 
@@ -1577,12 +1611,14 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(dimension(TestDims.DIM_A), "test15")
-            .set(dimension(TestDims.DIM_B), "test22")
-            .set(metric(TestTableFields.TEST_FIELD), 5d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(dimension(TestDims.DIM_A), "test15")
+              .set(dimension(TestDims.DIM_B), "test22")
+              .set(metric(TestTableFields.TEST_FIELD), 5d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -1692,17 +1728,19 @@ class TsdbTest
           NoMetricCollector
         )
         .onCall((_, b, _) =>
-          Iterator(
-            b.set(time, Time(pointTime1))
-              .set(dimension(TestDims.DIM_A), "test12")
-              .set(dimension(TestDims.DIM_B), "test2")
-              .set(metric(TestTableFields.TEST_FIELD), 1d)
-              .buildAndReset(),
-            b.set(time, Time(pointTime2))
-              .set(dimension(TestDims.DIM_A), "test12")
-              .set(dimension(TestDims.DIM_B), "test2")
-              .set(metric(TestTableFields.TEST_FIELD), 1d)
-              .buildAndReset()
+          Explanation.of(
+            Iterator(
+              b.set(time, Time(pointTime1))
+                .set(dimension(TestDims.DIM_A), "test12")
+                .set(dimension(TestDims.DIM_B), "test2")
+                .set(metric(TestTableFields.TEST_FIELD), 1d)
+                .buildAndReset(),
+              b.set(time, Time(pointTime2))
+                .set(dimension(TestDims.DIM_A), "test12")
+                .set(dimension(TestDims.DIM_B), "test2")
+                .set(metric(TestTableFields.TEST_FIELD), 1d)
+                .buildAndReset()
+            )
           )
         )
 
@@ -1809,17 +1847,19 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(dimension(TestDims.DIM_B), 23.toShort)
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(dimension(TestDims.DIM_B), 23.toShort)
-            .set(metric(TestTableFields.TEST_FIELD), 5d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(dimension(TestDims.DIM_B), 23.toShort)
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(dimension(TestDims.DIM_B), 23.toShort)
+              .set(metric(TestTableFields.TEST_FIELD), 5d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -1896,17 +1936,19 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(dimension(TestDims.DIM_A), "Test a 1")
-            .set(dimension(TestDims.DIM_B), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 2d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime))
-            .set(dimension(TestDims.DIM_A), "Test a 3")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 3d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(dimension(TestDims.DIM_A), "Test a 1")
+              .set(dimension(TestDims.DIM_B), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 2d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime))
+              .set(dimension(TestDims.DIM_A), "Test a 3")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 3d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -2002,27 +2044,29 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(dimension(TestDims.DIM_A), "A 1")
-            .set(dimension(TestDims.DIM_B), 1.toShort)
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime))
-            .set(dimension(TestDims.DIM_A), "A 2")
-            .set(dimension(TestDims.DIM_B), 1.toShort)
-            .set(metric(TestTableFields.TEST_FIELD), 3d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime))
-            .set(dimension(TestDims.DIM_A), "A 2")
-            .set(dimension(TestDims.DIM_B), 2.toShort)
-            .set(metric(TestTableFields.TEST_FIELD), 4d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime))
-            .set(dimension(TestDims.DIM_A), "A 3")
-            .set(dimension(TestDims.DIM_B), 2.toShort)
-            .set(metric(TestTableFields.TEST_FIELD), 6d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(dimension(TestDims.DIM_A), "A 1")
+              .set(dimension(TestDims.DIM_B), 1.toShort)
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime))
+              .set(dimension(TestDims.DIM_A), "A 2")
+              .set(dimension(TestDims.DIM_B), 1.toShort)
+              .set(metric(TestTableFields.TEST_FIELD), 3d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime))
+              .set(dimension(TestDims.DIM_A), "A 2")
+              .set(dimension(TestDims.DIM_B), 2.toShort)
+              .set(metric(TestTableFields.TEST_FIELD), 4d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime))
+              .set(dimension(TestDims.DIM_A), "A 3")
+              .set(dimension(TestDims.DIM_B), 2.toShort)
+              .set(metric(TestTableFields.TEST_FIELD), 6d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -2116,31 +2160,33 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test13")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test13")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test13")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test13")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -2194,27 +2240,29 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .set(metric(TestTableFields.TEST_STRING_FIELD), "001_01_1")
-            .buildAndReset(),
-          b.set(time, Time(pointTime1 + 1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .set(metric(TestTableFields.TEST_STRING_FIELD), "001_01_2")
-            .buildAndReset(),
-          b.set(time, Time(pointTime1 + 2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .set(metric(TestTableFields.TEST_STRING_FIELD), "001_01_200")
-            .buildAndReset(),
-          b.set(time, Time(pointTime1 + 3))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .set(metric(TestTableFields.TEST_STRING_FIELD), "001_02_1")
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .set(metric(TestTableFields.TEST_STRING_FIELD), "001_01_1")
+              .buildAndReset(),
+            b.set(time, Time(pointTime1 + 1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .set(metric(TestTableFields.TEST_STRING_FIELD), "001_01_2")
+              .buildAndReset(),
+            b.set(time, Time(pointTime1 + 2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .set(metric(TestTableFields.TEST_STRING_FIELD), "001_01_200")
+              .buildAndReset(),
+            b.set(time, Time(pointTime1 + 3))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .set(metric(TestTableFields.TEST_STRING_FIELD), "001_02_1")
+              .buildAndReset()
+          )
         )
       )
       .repeated(3)
@@ -2319,23 +2367,25 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "testA1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "testA1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "testA2")
-            .set(metric(TestTableFields.TEST_FIELD), 2d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "testA2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "testA1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "testA1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "testA2")
+              .set(metric(TestTableFields.TEST_FIELD), 2d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "testA2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -2399,22 +2449,24 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime3))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime3))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -2466,17 +2518,19 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -2527,17 +2581,19 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -2620,23 +2676,25 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -2695,37 +2753,39 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "testA1")
-            .set(dimension(TestDims.DIM_B), "testB2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "testA1")
-            .set(dimension(TestDims.DIM_B), "testB2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "testA2")
-            .set(dimension(TestDims.DIM_B), "testB1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "testA2")
-            .set(dimension(TestDims.DIM_B), "testB1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "testA1")
-            .set(dimension(TestDims.DIM_B), "testB1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "testA1")
-            .set(dimension(TestDims.DIM_B), "testB1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "testA1")
+              .set(dimension(TestDims.DIM_B), "testB2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "testA1")
+              .set(dimension(TestDims.DIM_B), "testB2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "testA2")
+              .set(dimension(TestDims.DIM_B), "testB1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "testA2")
+              .set(dimension(TestDims.DIM_B), "testB1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "testA1")
+              .set(dimension(TestDims.DIM_B), "testB1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "testA1")
+              .set(dimension(TestDims.DIM_B), "testB1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -2793,37 +2853,39 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "testA1")
-            .set(dimension(TestDims.DIM_B), "testB2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "testA1")
-            .set(dimension(TestDims.DIM_B), "testB2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "testA2")
-            .set(dimension(TestDims.DIM_B), "testB1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "testA2")
-            .set(dimension(TestDims.DIM_B), "testB1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "testA1")
-            .set(dimension(TestDims.DIM_B), "testB1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2 + 1000))
-            .set(dimension(TestDims.DIM_A), "testA1")
-            .set(dimension(TestDims.DIM_B), "testB1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "testA1")
+              .set(dimension(TestDims.DIM_B), "testB2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "testA1")
+              .set(dimension(TestDims.DIM_B), "testB2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "testA2")
+              .set(dimension(TestDims.DIM_B), "testB1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "testA2")
+              .set(dimension(TestDims.DIM_B), "testB1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "testA1")
+              .set(dimension(TestDims.DIM_B), "testB1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2 + 1000))
+              .set(dimension(TestDims.DIM_A), "testA1")
+              .set(dimension(TestDims.DIM_B), "testB1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -2893,31 +2955,33 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 10d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 15d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 10d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 15d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -2976,13 +3040,15 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1)).set(dimension(TestDims.DIM_A), "test1").buildAndReset(),
-          b.set(time, Time(pointTime2)).set(dimension(TestDims.DIM_A), "test1").buildAndReset(),
-          b.set(time, Time(pointTime1)).set(dimension(TestDims.DIM_A), "test1").buildAndReset(),
-          b.set(time, Time(pointTime2)).set(dimension(TestDims.DIM_A), "test1").buildAndReset(),
-          b.set(time, Time(pointTime1)).set(dimension(TestDims.DIM_A), "test1").buildAndReset(),
-          b.set(time, Time(pointTime2)).set(dimension(TestDims.DIM_A), "test1").buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1)).set(dimension(TestDims.DIM_A), "test1").buildAndReset(),
+            b.set(time, Time(pointTime2)).set(dimension(TestDims.DIM_A), "test1").buildAndReset(),
+            b.set(time, Time(pointTime1)).set(dimension(TestDims.DIM_A), "test1").buildAndReset(),
+            b.set(time, Time(pointTime2)).set(dimension(TestDims.DIM_A), "test1").buildAndReset(),
+            b.set(time, Time(pointTime1)).set(dimension(TestDims.DIM_A), "test1").buildAndReset(),
+            b.set(time, Time(pointTime2)).set(dimension(TestDims.DIM_A), "test1").buildAndReset()
+          )
         )
       )
 
@@ -3028,31 +3094,33 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(dimension(TestDims.DIM_A), "test12")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(dimension(TestDims.DIM_A), "test12")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -3106,16 +3174,18 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(dimension(TestDims.DIM_A), "test1")
-            .set(metric(TestTableFields.TEST_FIELD), 2d)
-            .buildAndReset(),
-          b.set(dimension(TestDims.DIM_A), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 3d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(dimension(TestDims.DIM_A), "test1")
+              .set(metric(TestTableFields.TEST_FIELD), 2d)
+              .buildAndReset(),
+            b.set(dimension(TestDims.DIM_A), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 3d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -3173,10 +3243,12 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime2)).set(dimension(TestDims.DIM_A), "1").buildAndReset(),
-          b.set(time, Time(pointTime1)).set(dimension(TestDims.DIM_A), "1").buildAndReset(),
-          b.set(time, Time(pointTime1)).set(dimension(TestDims.DIM_A), "2").buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime2)).set(dimension(TestDims.DIM_A), "1").buildAndReset(),
+            b.set(time, Time(pointTime1)).set(dimension(TestDims.DIM_A), "1").buildAndReset(),
+            b.set(time, Time(pointTime1)).set(dimension(TestDims.DIM_A), "2").buildAndReset()
+          )
         )
       )
 
@@ -3259,13 +3331,15 @@ class TsdbTest
         NoMetricCollector
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(metric(TestTableFields.TEST_FIELD), null)
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(metric(TestTableFields.TEST_FIELD), null)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(metric(TestTableFields.TEST_FIELD), null)
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(metric(TestTableFields.TEST_FIELD), null)
+              .buildAndReset()
+          )
         )
       )
 
@@ -3368,17 +3442,19 @@ class TsdbTest
         *
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(from.plusHours(2)))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset(),
-          b.set(time, Time(from.plusHours(5)))
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .set(metric(TestTableFields.TEST_FIELD), 1d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(from.plusHours(2)))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset(),
+            b.set(time, Time(from.plusHours(5)))
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .set(metric(TestTableFields.TEST_FIELD), 1d)
+              .buildAndReset()
+          )
         )
       )
 

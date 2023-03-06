@@ -20,12 +20,13 @@ import com.typesafe.scalalogging.StrictLogging
 import org.yupana.api.Time
 import org.yupana.api.query.Expression.Condition
 import org.yupana.api.query._
-import org.yupana.api.schema.{ ExternalLink, Schema }
+import org.yupana.api.schema.{ ExternalLink, Schema, Table }
 import org.yupana.core.auth.YupanaUser
 import org.yupana.core.dao.{ ChangelogDao, TSDao }
 import org.yupana.core.model.{ InternalQuery, InternalRow, InternalRowBuilder, KeyData }
+import org.yupana.core.utils.Explanation.Explained
 import org.yupana.core.utils.metric.{ MetricQueryCollector, NoMetricCollector }
-import org.yupana.core.utils.{ ConditionUtils, FlatAndCondition }
+import org.yupana.core.utils.{ ConditionUtils, Explanation, FlatAndCondition, Writer }
 import org.yupana.metrics.Failed
 
 import java.util.concurrent.atomic.AtomicInteger
@@ -98,7 +99,11 @@ trait TsdbBase extends StrictLogging {
     * The pipeline is not responsible for limiting. This means that collection have to be lazy, to avoid extra
     * calculations if limit is defined.
     */
-  def query(query: Query): Result = {
+  def query(query: Query): Result = queryWithExplanation(query).run._2
+
+  def explain(query: Query): List[Explanation] = queryWithExplanation(query).run._1
+
+  def queryWithExplanation(query: Query): Explained[Result] = {
 
     val preparedQuery = prepareQuery(query)
     logger.info(s"TSDB query with ${preparedQuery.uuidLog} start: " + preparedQuery)
@@ -112,54 +117,74 @@ trait TsdbBase extends StrictLogging {
 
     metricCollector.start()
 
-    val (rows, queryContext) = query.table match {
+    query.table match {
       case Some(table) =>
-        val substitutedCondition = optimizedQuery.filter.map(c => substituteLinks(c, metricCollector))
-        logger.debug(s"Substituted condition: $substitutedCondition")
-
-        val conditions = substitutedCondition
-          .map(_.map { tbc =>
-            val daoConditions =
-              tbc.conditions.filter(c => c != ConstantExpr(true) && !dao.isSupportedCondition(c))
-            tbc.copy(conditions = daoConditions)
-          })
-          .filter(_.nonEmpty)
-
-        logger.debug(s"Without dao conditions: $conditions")
-
-        val condition = conditions.flatMap(mergeCondition)
-        logger.debug(s"Final condition: $condition")
-
-        val qc =
-          metricCollector.createContext.measure(1)(new QueryContext(optimizedQuery, condition, calculatorFactory))
-
-        val daoExprs = qc.exprsIndex.keys.collect {
-          case e: DimensionExpr[_] => e
-          case e: DimensionIdExpr  => e
-          case e: MetricExpr[_]    => e
-          case TimeExpr            => TimeExpr
+        handleDaoQuery(table, metricCollector, optimizedQuery).map {
+          case (r, qc) =>
+            processRows(qc, metricCollector, mr, r)
         }
 
-        val r = substitutedCondition match {
-          case Some(c) =>
-            val internalQuery = InternalQuery(table, daoExprs.toSet[Expression[_]], c, query.hints)
-            dao.query(internalQuery, new InternalRowBuilder(qc), metricCollector)
-
-          case None =>
-            val th = new IllegalArgumentException("Empty condition")
-            metricCollector.setQueryStatus(Failed(th))
-            throw th
-        }
-
-        r -> qc
       case None =>
-        val qc =
-          metricCollector.createContext.measure(1)(new QueryContext(optimizedQuery, query.filter, calculatorFactory))
-        val rb = new InternalRowBuilder(qc)
-        mr.singleton(rb.buildAndReset()) -> qc
+        val (r, qc) = handleConstantQuery(metricCollector, mr, optimizedQuery)
+        Writer(processRows(qc, metricCollector, mr, r))
     }
 
-    processRows(queryContext, metricCollector, mr, rows)
+  }
+
+  private def handleDaoQuery(
+      table: Table,
+      metricCollector: MetricQueryCollector,
+      query: Query
+  ): Explained[(Collection[InternalRow], QueryContext)] = {
+    val substitutedCondition = query.filter.map(c => substituteLinks(c, metricCollector))
+    logger.debug(s"Substituted condition: $substitutedCondition")
+
+    val conditions = substitutedCondition
+      .map(_.map { tbc =>
+        val daoConditions =
+          tbc.conditions.filter(c => c != ConstantExpr(true) && !dao.isSupportedCondition(c))
+        tbc.copy(conditions = daoConditions)
+      })
+      .filter(_.nonEmpty)
+
+    logger.debug(s"Without dao conditions: $conditions")
+
+    val condition = conditions.flatMap(mergeCondition)
+    logger.debug(s"Final condition: $condition")
+
+    val qc =
+      metricCollector.createContext.measure(1)(new QueryContext(query, condition, calculatorFactory))
+
+    val daoExprs = qc.exprsIndex.keys.collect {
+      case e: DimensionExpr[_] => e
+      case e: DimensionIdExpr  => e
+      case e: MetricExpr[_]    => e
+      case TimeExpr            => TimeExpr
+    }
+
+    val r = substitutedCondition match {
+      case Some(c) =>
+        val internalQuery = InternalQuery(table, daoExprs.toSet[Expression[_]], c, query.hints)
+        dao.query(internalQuery, new InternalRowBuilder(qc), metricCollector)
+
+      case None =>
+        val th = new IllegalArgumentException("Empty condition")
+        metricCollector.setQueryStatus(Failed(th))
+        throw th
+    }
+
+    r.map(_ -> qc)
+  }
+
+  private def handleConstantQuery(
+      metricCollector: MetricQueryCollector,
+      mr: MapReducible[Collection],
+      query: Query
+  ): (Collection[InternalRow], QueryContext) = {
+    val qc =
+      metricCollector.createContext.measure(1)(new QueryContext(query, query.filter, calculatorFactory))
+    val rb = new InternalRowBuilder(qc)
+    mr.singleton(rb.buildAndReset()) -> qc
   }
 
   def processRows(

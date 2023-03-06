@@ -24,8 +24,8 @@ import org.yupana.core.utils.CollectionUtils
 class Filters(
     includes: Map[Dimension, SortedSetIterator[_]],
     excludes: Map[Dimension, SortedSetIterator[_]],
-    val includeTime: Option[Set[Time]],
-    val excludeTime: Option[Set[Time]]
+    val includeTime: Set[Time],
+    val excludeTime: Set[Time]
 ) {
 
   def allIncludes: Map[Dimension, SortedSetIterator[_]] = {
@@ -46,7 +46,7 @@ object Filters {
 
   def newBuilder: Builder = new Builder(Map.empty, Map.empty, Map.empty, Map.empty, Option.empty, Option.empty)
 
-  def empty = new Filters(Map.empty, Map.empty, None, None)
+  def empty = new Filters(Map.empty, Map.empty, Set.empty, Set.empty)
 
   class Builder(
       private val incValues: Map[Dimension, SortedSetIterator[_]],
@@ -249,7 +249,12 @@ object Filters {
     }
 
     def build(valuesToIds: (DictionaryDimension, SortedSetIterator[String]) => SortedSetIterator[Long]): Filters = {
-      new Filters(includeFilter(valuesToIds), excludeFilter(valuesToIds), incTime, excTime)
+      new Filters(
+        includeFilter(valuesToIds),
+        excludeFilter(valuesToIds),
+        incTime.getOrElse(Set.empty),
+        excTime.getOrElse(Set.empty)
+      )
     }
 
     private def intersect[T](cur: Option[SortedSetIterator[T]], vs: SortedSetIterator[T]): SortedSetIterator[T] = {

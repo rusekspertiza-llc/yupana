@@ -15,14 +15,34 @@
  */
 
 package org.yupana.core
-import org.yupana.api.query.{ DataPoint, Query, Result }
+import org.yupana.api.query.{ DataPoint, Query, Result, SimpleResult }
+import org.yupana.api.types.DataType
+import org.yupana.core.utils.Explanation
 
 class TimeSeriesQueryEngine(tsdb: TSDB) {
   def query(query: Query): Result = {
     tsdb.query(query)
   }
 
+  def explain(query: Query): Result = {
+    val steps = tsdb.explain(query)
+
+    val filter: Explanation => Boolean = !_.trace
+
+    SimpleResult(
+      "Explanation",
+      TimeSeriesQueryEngine.explainColumns,
+      TimeSeriesQueryEngine.explainTypes,
+      steps.withFilter(filter).map(e => Array[Any](e.component, e.message)).iterator
+    )
+  }
+
   def put(dps: Seq[DataPoint]): Unit = {
     tsdb.put(dps.iterator)
   }
+}
+
+object TimeSeriesQueryEngine {
+  private val explainColumns = Seq("COMPONENT", "MESSAGE")
+  private val explainTypes = explainColumns.map(_ => DataType[String])
 }

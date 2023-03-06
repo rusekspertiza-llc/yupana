@@ -7,6 +7,7 @@ import org.yupana.api.query.Expression.Condition
 import org.yupana.api.schema.Table
 import org.yupana.core.{ IteratorMapReducible, MapReducible }
 import org.yupana.core.model.{ InternalQuery, InternalRow, InternalRowBuilder, UpdateInterval }
+import org.yupana.core.utils.Explanation.Explained
 import org.yupana.core.utils.metric.MetricQueryCollector
 
 import java.time.{ OffsetDateTime, ZoneOffset }
@@ -35,7 +36,7 @@ class TSDaoTest extends AnyFlatSpec with Matchers {
           query: InternalQuery,
           valueDataBuilder: InternalRowBuilder,
           metricCollector: MetricQueryCollector
-      ): Iterator[InternalRow] = ???
+      ): Explained[Iterator[InternalRow]] = ???
 
       override def mapReduceEngine(metricQueryCollector: MetricQueryCollector): MapReducible[Iterator] = ???
       override def isSupportedCondition(condition: Condition): Boolean = ???

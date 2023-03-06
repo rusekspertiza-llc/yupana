@@ -97,7 +97,7 @@ class RelatedItemsCatalogImpl(tsdb: TsdbBase, override val externalLink: Related
       filter = filter
     )
 
-    val result = tsdb.query(q)
+    val result = tsdb.queryWithExplanation(q).run._2 // TODO: PASS EXPLANATION UP!
 
     val timeIdx = result.queryContext.exprsIndex(time)
     val kkmIdIdx = result.queryContext.exprsIndex(dimension(Dimensions.KKM_ID))

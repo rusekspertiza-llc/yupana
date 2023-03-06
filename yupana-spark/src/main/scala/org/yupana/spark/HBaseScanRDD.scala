@@ -92,15 +92,18 @@ class HBaseScanRDD(
           partition.rangeScanDimsIds
         )
 
-      HBaseUtils.createScan(
-        partition.queryContext,
-        filter,
-        Seq.empty,
-        fromTime,
-        toTime,
-        Some(partition.startKey),
-        Some(partition.endKey)
-      )
+      HBaseUtils
+        .createScan(
+          partition.queryContext,
+          filter,
+          Seq.empty,
+          fromTime,
+          toTime,
+          Some(partition.startKey),
+          Some(partition.endKey)
+        )
+        .run
+        ._2
     }
 
     scan match {

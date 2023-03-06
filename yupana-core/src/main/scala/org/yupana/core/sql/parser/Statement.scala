@@ -27,6 +27,8 @@ case class Select(
     limit: Option[Int]
 ) extends Statement
 
+case class Explain(select: Select) extends Statement
+
 case class Upsert(
     tableName: String,
     fieldNames: Seq[String],

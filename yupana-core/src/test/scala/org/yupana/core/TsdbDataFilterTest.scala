@@ -7,7 +7,7 @@ import org.yupana.api.Time
 import org.yupana.api.query.{ ConditionTransformation, Expression, LinkExpr }
 import org.yupana.api.schema.LinkField
 import org.yupana.core.model.InternalQuery
-import org.yupana.core.utils.{ FlatAndCondition, SparseTable }
+import org.yupana.core.utils.{ Explanation, FlatAndCondition, SparseTable }
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.yupana.cache.CacheFactory
@@ -73,17 +73,19 @@ class TsdbDataFilterTest
         *
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 1012d)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), 2.toShort)
-            .buildAndReset(),
-          b.set(time, Time(pointTime + 100))
-            .set(metric(TestTableFields.TEST_FIELD), 1013d)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), 2.toShort)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 1012d)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), 2.toShort)
+              .buildAndReset(),
+            b.set(time, Time(pointTime + 100))
+              .set(metric(TestTableFields.TEST_FIELD), 1013d)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), 2.toShort)
+              .buildAndReset()
+          )
         )
       )
 
@@ -125,17 +127,19 @@ class TsdbDataFilterTest
         *
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 1012d)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), 31.toShort)
-            .buildAndReset(),
-          b.set(time, Time(pointTime + 100))
-            .set(metric(TestTableFields.TEST_FIELD), 1013d)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), 31.toShort)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 1012d)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), 31.toShort)
+              .buildAndReset(),
+            b.set(time, Time(pointTime + 100))
+              .set(metric(TestTableFields.TEST_FIELD), 1013d)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), 31.toShort)
+              .buildAndReset()
+          )
         )
       )
 
@@ -175,17 +179,19 @@ class TsdbDataFilterTest
         *
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 1012d)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), 2.toShort)
-            .buildAndReset(),
-          b.set(time, Time(pointTime + 100))
-            .set(metric(TestTableFields.TEST_FIELD), 1013d)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), 2.toShort)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 1012d)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), 2.toShort)
+              .buildAndReset(),
+            b.set(time, Time(pointTime + 100))
+              .set(metric(TestTableFields.TEST_FIELD), 1013d)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), 2.toShort)
+              .buildAndReset()
+          )
         )
       )
 
@@ -226,19 +232,21 @@ class TsdbDataFilterTest
         *
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 1012d)
-            .set(metric(TestTableFields.TEST_FIELD2), 1013d)
-            .set(dimension(TestDims.DIM_A), "test11")
-            .set(dimension(TestDims.DIM_B), "test12")
-            .buildAndReset(),
-          b.set(time, Time(pointTime + 100))
-            .set(metric(TestTableFields.TEST_FIELD), 1013d)
-            .set(metric(TestTableFields.TEST_FIELD2), 1013d)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 1012d)
+              .set(metric(TestTableFields.TEST_FIELD2), 1013d)
+              .set(dimension(TestDims.DIM_A), "test11")
+              .set(dimension(TestDims.DIM_B), "test12")
+              .buildAndReset(),
+            b.set(time, Time(pointTime + 100))
+              .set(metric(TestTableFields.TEST_FIELD), 1013d)
+              .set(metric(TestTableFields.TEST_FIELD2), 1013d)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .buildAndReset()
+          )
         )
       )
 
@@ -278,17 +286,19 @@ class TsdbDataFilterTest
         *
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 1012d)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .buildAndReset(),
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 1014d)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 1012d)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .buildAndReset(),
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 1014d)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .buildAndReset()
+          )
         )
       )
 
@@ -337,22 +347,24 @@ class TsdbDataFilterTest
         *
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 123d)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .buildAndReset(),
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 234d)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .buildAndReset(),
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), null)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 123d)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .buildAndReset(),
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 234d)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .buildAndReset(),
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), null)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .buildAndReset()
+          )
         )
       )
 
@@ -422,24 +434,26 @@ class TsdbDataFilterTest
         *
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 1012d)
-            .set(metric(TestTableFields.TEST_STRING_FIELD), "asdsadasd")
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .buildAndReset(),
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 1012d)
-            .set(metric(TestTableFields.TEST_STRING_FIELD), "Str@!")
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .buildAndReset(),
-          b.set(time, Time(pointTime))
-            .set(metric(TestTableFields.TEST_FIELD), 1013d)
-            .set(dimension(TestDims.DIM_A), "test1")
-            .set(dimension(TestDims.DIM_B), "test2")
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 1012d)
+              .set(metric(TestTableFields.TEST_STRING_FIELD), "asdsadasd")
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .buildAndReset(),
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 1012d)
+              .set(metric(TestTableFields.TEST_STRING_FIELD), "Str@!")
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .buildAndReset(),
+            b.set(time, Time(pointTime))
+              .set(metric(TestTableFields.TEST_FIELD), 1013d)
+              .set(dimension(TestDims.DIM_A), "test1")
+              .set(dimension(TestDims.DIM_B), "test2")
+              .buildAndReset()
+          )
         )
       )
 
@@ -499,17 +513,19 @@ class TsdbDataFilterTest
         *
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(metric(TestTableFields.TEST_FIELD), 10d)
-            .set(dimension(TestDims.DIM_A), "test1a")
-            .set(dimension(TestDims.DIM_B), "test2b")
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(metric(TestTableFields.TEST_FIELD), 30d)
-            .set(dimension(TestDims.DIM_A), "test2a")
-            .set(dimension(TestDims.DIM_B), "test3b")
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(metric(TestTableFields.TEST_FIELD), 10d)
+              .set(dimension(TestDims.DIM_A), "test1a")
+              .set(dimension(TestDims.DIM_B), "test2b")
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(metric(TestTableFields.TEST_FIELD), 30d)
+              .set(dimension(TestDims.DIM_A), "test2a")
+              .set(dimension(TestDims.DIM_B), "test3b")
+              .buildAndReset()
+          )
         )
       )
 
@@ -569,17 +585,19 @@ class TsdbDataFilterTest
         *
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(metric(TestTableFields.TEST_FIELD), 10d)
-            .set(dimension(TestDims.DIM_A), "test1a")
-            .set(dimension(TestDims.DIM_B), "test2b")
-            .buildAndReset(),
-          b.set(time, Time(pointTime1))
-            .set(metric(TestTableFields.TEST_FIELD), 30d)
-            .set(dimension(TestDims.DIM_A), "test2a")
-            .set(dimension(TestDims.DIM_B), "test3b")
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(metric(TestTableFields.TEST_FIELD), 10d)
+              .set(dimension(TestDims.DIM_A), "test1a")
+              .set(dimension(TestDims.DIM_B), "test2b")
+              .buildAndReset(),
+            b.set(time, Time(pointTime1))
+              .set(metric(TestTableFields.TEST_FIELD), 30d)
+              .set(dimension(TestDims.DIM_A), "test2a")
+              .set(dimension(TestDims.DIM_B), "test3b")
+              .buildAndReset()
+          )
         )
       )
 
@@ -664,27 +682,29 @@ class TsdbDataFilterTest
           *
         )
         .onCall((_, b, _) =>
-          Iterator(
-            b.set(time, Time(pointTime1))
-              .set(metric(TestTableFields.TEST_FIELD), 1001d)
-              .set(dimension(TestDims.DIM_A), "test2a")
-              .set(dimension(TestDims.DIM_B), 15.toShort)
-              .buildAndReset(),
-            b.set(time, Time(pointTime1 + 10))
-              .set(metric(TestTableFields.TEST_FIELD), 1002d)
-              .set(dimension(TestDims.DIM_A), "test2a")
-              .set(dimension(TestDims.DIM_B), 15.toShort)
-              .buildAndReset(),
-            b.set(time, Time(pointTime1 + 10))
-              .set(metric(TestTableFields.TEST_FIELD), 103d)
-              .set(dimension(TestDims.DIM_A), "test2a")
-              .set(dimension(TestDims.DIM_B), 15.toShort)
-              .buildAndReset(),
-            b.set(time, Time(pointTime1 + 10))
-              .set(metric(TestTableFields.TEST_FIELD), 1003d)
-              .set(dimension(TestDims.DIM_A), "test1a")
-              .set(dimension(TestDims.DIM_B), 15.toShort)
-              .buildAndReset()
+          Explanation.of(
+            Iterator(
+              b.set(time, Time(pointTime1))
+                .set(metric(TestTableFields.TEST_FIELD), 1001d)
+                .set(dimension(TestDims.DIM_A), "test2a")
+                .set(dimension(TestDims.DIM_B), 15.toShort)
+                .buildAndReset(),
+              b.set(time, Time(pointTime1 + 10))
+                .set(metric(TestTableFields.TEST_FIELD), 1002d)
+                .set(dimension(TestDims.DIM_A), "test2a")
+                .set(dimension(TestDims.DIM_B), 15.toShort)
+                .buildAndReset(),
+              b.set(time, Time(pointTime1 + 10))
+                .set(metric(TestTableFields.TEST_FIELD), 103d)
+                .set(dimension(TestDims.DIM_A), "test2a")
+                .set(dimension(TestDims.DIM_B), 15.toShort)
+                .buildAndReset(),
+              b.set(time, Time(pointTime1 + 10))
+                .set(metric(TestTableFields.TEST_FIELD), 1003d)
+                .set(dimension(TestDims.DIM_A), "test1a")
+                .set(dimension(TestDims.DIM_B), 15.toShort)
+                .buildAndReset()
+            )
           )
         )
 
@@ -751,15 +771,17 @@ class TsdbDataFilterTest
         *
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime1))
-            .set(metric(TestTableFields.TEST_FIELD), 1011d)
-            .set(dimension(TestDims.DIM_A), "test1a")
-            .buildAndReset(),
-          b.set(time, Time(pointTime2))
-            .set(metric(TestTableFields.TEST_FIELD), 3001d)
-            .set(dimension(TestDims.DIM_A), "test2a")
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime1))
+              .set(metric(TestTableFields.TEST_FIELD), 1011d)
+              .set(dimension(TestDims.DIM_A), "test1a")
+              .buildAndReset(),
+            b.set(time, Time(pointTime2))
+              .set(metric(TestTableFields.TEST_FIELD), 3001d)
+              .set(dimension(TestDims.DIM_A), "test2a")
+              .buildAndReset()
+          )
         )
       )
 
@@ -792,11 +814,13 @@ class TsdbDataFilterTest
         *
       )
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(time, Time(pointTime))
-            .set(metric(TestTable2Fields.TEST_FIELD2), 0d)
-            .set(metric(TestTable2Fields.TEST_FIELD3), BigDecimal(5))
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(time, Time(pointTime))
+              .set(metric(TestTable2Fields.TEST_FIELD2), 0d)
+              .set(metric(TestTable2Fields.TEST_FIELD3), BigDecimal(5))
+              .buildAndReset()
+          )
         )
       )
 
@@ -815,9 +839,11 @@ class TsdbDataFilterTest
     (tsdbDaoMock.query _)
       .expects(*, *, *)
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(Time(from.plusMinutes(10))).set(dimension(TestDims.DIM_B), 12.toShort).buildAndReset(),
-          b.set(Time(from.plusHours(3))).set(dimension(TestDims.DIM_B), 15.toShort).buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(Time(from.plusMinutes(10))).set(dimension(TestDims.DIM_B), 12.toShort).buildAndReset(),
+            b.set(Time(from.plusHours(3))).set(dimension(TestDims.DIM_B), 15.toShort).buildAndReset()
+          )
         )
       )
 
@@ -847,15 +873,17 @@ class TsdbDataFilterTest
     (tsdbDaoMock.query _)
       .expects(*, *, *)
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(Time(from.plusMinutes(2)))
-            .set(dimension(TestDims.DIM_B), 1.toShort)
-            .set(metric(TestTableFields.TEST_FIELD), 4d)
-            .buildAndReset(),
-          b.set(Time(from.plusMinutes(2)))
-            .set(dimension(TestDims.DIM_B), 2.toShort)
-            .set(metric(TestTableFields.TEST_FIELD), 8d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(Time(from.plusMinutes(2)))
+              .set(dimension(TestDims.DIM_B), 1.toShort)
+              .set(metric(TestTableFields.TEST_FIELD), 4d)
+              .buildAndReset(),
+            b.set(Time(from.plusMinutes(2)))
+              .set(dimension(TestDims.DIM_B), 2.toShort)
+              .set(metric(TestTableFields.TEST_FIELD), 8d)
+              .buildAndReset()
+          )
         )
       )
 
@@ -873,23 +901,25 @@ class TsdbDataFilterTest
     (tsdbDaoMock.query _)
       .expects(*, *, *)
       .onCall((_, b, _) =>
-        Iterator(
-          b.set(Time(from.plusMinutes(2)))
-            .set(dimension(TestDims.DIM_B), 1.toShort)
-            .set(metric(TestTableFields.TEST_FIELD), 4d)
-            .buildAndReset(),
-          b.set(Time(from.plusMinutes(2)))
-            .set(dimension(TestDims.DIM_B), 2.toShort)
-            .set(metric(TestTableFields.TEST_FIELD), 8d)
-            .buildAndReset(),
-          b.set(Time(from.minusYears(1).plusMinutes(2)))
-            .set(dimension(TestDims.DIM_B), 1.toShort)
-            .set(metric(TestTableFields.TEST_FIELD), 4d)
-            .buildAndReset(),
-          b.set(Time(from.minusYears(1).plusMinutes(2)))
-            .set(dimension(TestDims.DIM_B), 2.toShort)
-            .set(metric(TestTableFields.TEST_FIELD), 8d)
-            .buildAndReset()
+        Explanation.of(
+          Iterator(
+            b.set(Time(from.plusMinutes(2)))
+              .set(dimension(TestDims.DIM_B), 1.toShort)
+              .set(metric(TestTableFields.TEST_FIELD), 4d)
+              .buildAndReset(),
+            b.set(Time(from.plusMinutes(2)))
+              .set(dimension(TestDims.DIM_B), 2.toShort)
+              .set(metric(TestTableFields.TEST_FIELD), 8d)
+              .buildAndReset(),
+            b.set(Time(from.minusYears(1).plusMinutes(2)))
+              .set(dimension(TestDims.DIM_B), 1.toShort)
+              .set(metric(TestTableFields.TEST_FIELD), 4d)
+              .buildAndReset(),
+            b.set(Time(from.minusYears(1).plusMinutes(2)))
+              .set(dimension(TestDims.DIM_B), 2.toShort)
+              .set(metric(TestTableFields.TEST_FIELD), 8d)
+              .buildAndReset()
+          )
         )
       )
 

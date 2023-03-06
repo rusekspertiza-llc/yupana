@@ -27,7 +27,8 @@ import org.yupana.api.utils.ConditionMatchers._
 import org.yupana.api.utils.{ PrefetchedSortedSetIterator, SortedSetIterator }
 import org.yupana.core.dao._
 import org.yupana.core.model.{ InternalQuery, InternalRow, InternalRowBuilder }
-import org.yupana.core.utils.FlatAndCondition
+import org.yupana.core.utils.Explanation.Explained
+import org.yupana.core.utils.{ Explanation, FlatAndCondition, Writer }
 import org.yupana.core.utils.metric.MetricQueryCollector
 
 import java.time.Instant
@@ -59,39 +60,37 @@ trait TSDaoHBaseBase[Collection[_]] extends TSDao[Collection, Long] with StrictL
       queryContext: InternalQueryContext,
       intervals: Seq[(Long, Long)],
       rangeScanDims: Iterator[Map[Dimension, Seq[_]]]
-  ): Collection[HResult]
+  ): Explained[Collection[HResult]]
 
   private def calculateTimeIntervals(
       table: Table,
       from: Long,
       to: Long,
-      includeTime: Option[Set[Time]],
-      excludeTime: Option[Set[Time]]
+      includeTime: Set[Time],
+      excludeTime: Set[Time]
   ): Seq[(Long, Long)] = {
 
-    includeTime match {
-      case None =>
-        Seq((from, to))
+    if (includeTime.isEmpty) {
+      Seq((from, to))
+    } else {
+      val timePoints = (includeTime.map(_.millis) -- excludeTime.map(_.millis)).toSeq
 
-      case Some(inc) =>
-        val timePoints = (inc.map(_.millis) -- excludeTime.map(_.map(_.millis)).getOrElse(Set.empty)).toSeq
+      val intervals = timePoints
+        .groupBy { t =>
+          val s = HBaseUtils.baseTime(t, table)
+          s -> (s + table.rowTimeSpan)
+        }
+        .map { case (k, vs) => k -> vs.sorted }
+        .toSeq
 
-        val intervals = timePoints
-          .groupBy { t =>
-            val s = HBaseUtils.baseTime(t, table)
-            s -> (s + table.rowTimeSpan)
-          }
-          .map { case (k, vs) => k -> vs.sorted }
-          .toSeq
-
-        intervals
-          .sortBy(_._1._1)
-          .foldRight(List.empty[((Long, Long), Seq[Long])]) {
-            case (i @ ((iFrom, iTo), iVs), (x @ ((xFrom, xTo), xVs)) :: xs) =>
-              if (xFrom == iTo) ((iFrom, xTo), iVs ++ xVs) :: xs else i :: x :: xs
-            case (i, Nil) => i :: Nil
-          }
-          .map(x => x._2.head -> (x._2.last + 1))
+      intervals
+        .sortBy(_._1._1)
+        .foldRight(List.empty[((Long, Long), Seq[Long])]) {
+          case (i @ ((iFrom, iTo), iVs), (x @ ((xFrom, xTo), xVs)) :: xs) =>
+            if (xFrom == iTo) ((iFrom, xTo), iVs ++ xVs) :: xs else i :: x :: xs
+          case (i, Nil) => i :: Nil
+        }
+        .map(x => x._2.head -> (x._2.last + 1))
     }
   }
 
@@ -99,14 +98,14 @@ trait TSDaoHBaseBase[Collection[_]] extends TSDao[Collection, Long] with StrictL
       query: InternalQuery,
       internalRowBuilder: InternalRowBuilder,
       metricCollector: MetricQueryCollector
-  ): Collection[InternalRow] = {
+  ): Explained[Collection[InternalRow]] = {
 
     val context = InternalQueryContext(query, metricCollector)
     val mr = mapReduceEngine(metricCollector)
 
     val conditionByTime = FlatAndCondition.mergeByTime(query.condition)
 
-    val results: Seq[Collection[InternalRow]] = conditionByTime.map {
+    val results: Explained[Seq[Collection[InternalRow]]] = Writer.traverseList(conditionByTime.toList) {
       case (from, to, c) =>
         logger.debug(
           s"Run subquery $c for time >= ${Instant.ofEpochMilli(from)} and time < ${Instant.ofEpochMilli(to)}"
@@ -130,7 +129,7 @@ trait TSDaoHBaseBase[Collection[_]] extends TSDao[Collection, Long] with StrictL
         val sizeLimitedRangeScanDims = rangeScanDimensions(query, prefetchedDimIterators)
 
         if (hasEmptyFilter) {
-          mr.empty[InternalRow]
+          Explanation.of(mr.empty[InternalRow])
         } else {
           val rangeScanDimIterators = sizeLimitedRangeScanDims.map { d =>
             d -> prefetchedDimIterators(d)
@@ -143,27 +142,26 @@ trait TSDaoHBaseBase[Collection[_]] extends TSDao[Collection, Long] with StrictL
 
           val excludeRowFilter = filters.allExcludes.filter { case (d, _) => !sizeLimitedRangeScanDims.contains(d) }
 
-          val rowFilter = createRowFilter(query.table, includeRowFilter, excludeRowFilter)
-          val timeFilter = createTimeFilter(
-            intervals,
-            filters.includeTime.getOrElse(Set.empty),
-            filters.excludeTime.getOrElse(Set.empty)
-          )
-
           import org.yupana.core.utils.metric.MetricUtils._
-          val table = query.table
-          mr.batchFlatMap(rows, EXTRACT_BATCH_SIZE) { rs =>
-            val filtered = context.metricsCollector.filterRows.measure(rs.size) {
-              rs.filter(r => rowFilter(HBaseUtils.parseRowKey(r.getRow, table)))
-            }
 
-            new TSDHBaseRowIterator(context, filtered.iterator, internalRowBuilder)
-              .filter(r => timeFilter(r.get[Time](internalRowBuilder.timeIndex).millis))
-          }.withSavedMetrics(context.metricsCollector)
+          for {
+            r <- rows
+            rowFilter <- createRowFilter(query.table, includeRowFilter, excludeRowFilter)
+            timeFilter = createTimeFilter(intervals, filters.includeTime, filters.excludeTime)
+          } yield {
+            mr.batchFlatMap(r, EXTRACT_BATCH_SIZE) { rs =>
+              val filtered = context.metricsCollector.filterRows.measure(rs.size) {
+                rs.filter(r => rowFilter(HBaseUtils.parseRowKey(r.getRow, query.table)))
+              }
+
+              new TSDHBaseRowIterator(context, filtered.iterator, internalRowBuilder)
+                .filter(r => timeFilter(r.get[Time](internalRowBuilder.timeIndex).millis))
+            }.withSavedMetrics(context.metricsCollector)
+          }
         }
     }
 
-    results.reduce(mr.concat[InternalRow])
+    results.map(_.reduce(mr.concat[InternalRow]))
   }
 
   def valuesToIds(dimension: DictionaryDimension, values: SortedSetIterator[String]): SortedSetIterator[IdType] = {
@@ -247,12 +245,12 @@ trait TSDaoHBaseBase[Collection[_]] extends TSDao[Collection, Long] with StrictL
       table: Table,
       include: Map[Dimension, SortedSetIterator[_]],
       exclude: Map[Dimension, SortedSetIterator[_]]
-  ): RowFilter = {
+  ): Explained[RowFilter] = {
 
     val includeMap: Map[Dimension, Set[Any]] = include.map { case (k, v) => k -> v.toSet }
     val excludeMap: Map[Dimension, Set[Any]] = exclude.map { case (k, v) => k -> v.toSet }
 
-    if (excludeMap.nonEmpty) {
+    val f: RowFilter = if (excludeMap.nonEmpty) {
       if (includeMap.nonEmpty) {
         rowFilter(
           table,
@@ -268,6 +266,14 @@ trait TSDaoHBaseBase[Collection[_]] extends TSDao[Collection, Long] with StrictL
         true
       }
     }
+
+    if (includeMap.nonEmpty || excludeMap.nonEmpty) {
+      val desc = List(
+        includeMap.map { case (d, vs) => s"${d.name} IN (${vs.size} values)" }.mkString(", "),
+        excludeMap.map { case (d, vs) => s"${d.name} NOT IN (${vs.size} values)" }.mkString(", ")
+      ).filter(_.nonEmpty).mkString("; ")
+      Explanation.of(Explanation(Explanation.DAO, s"Row filter: $desc"), f)
+    } else Explanation.of(f)
   }
 
   private def rowFilter(table: Table, f: (Dimension, Any) => Boolean): RowFilter = { rowKey =>

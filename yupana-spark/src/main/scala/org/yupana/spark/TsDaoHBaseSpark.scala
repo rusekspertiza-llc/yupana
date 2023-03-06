@@ -25,6 +25,8 @@ import org.yupana.api.schema.{ Dimension, Schema }
 import org.yupana.core.MapReducible
 import org.yupana.core.dao.{ DictionaryProvider, TSDao }
 import org.yupana.core.model.UpdateInterval
+import org.yupana.core.utils.Explanation
+import org.yupana.core.utils.Explanation.Explained
 import org.yupana.core.utils.metric.MetricQueryCollector
 import org.yupana.hbase.HBaseUtils.doPutBatch
 import org.yupana.hbase._
@@ -50,7 +52,7 @@ class TsDaoHBaseSpark(
       queryContext: InternalQueryContext,
       intervals: Seq[(Long, Long)],
       rangeScanDims: Iterator[Map[Dimension, Seq[_]]]
-  ): RDD[HResult] = {
+  ): Explained[RDD[HResult]] = {
     val progressFile = queryContext.hints.collectFirst { case ProgressHint(fileName) => fileName }
     if (rangeScanDims.nonEmpty) {
       val rdds = rangeScanDims.zipWithIndex.flatMap {
@@ -70,9 +72,9 @@ class TsDaoHBaseSpark(
               new HBaseScanRDD(sparkContext, config, queryContext, from, to, dimIds, listener)
           }
       }
-      sparkContext.union(rdds.toSeq)
+      Explanation.of(sparkContext.union(rdds.toSeq))
     } else {
-      sparkContext.emptyRDD[HResult]
+      Explanation.of(sparkContext.emptyRDD[HResult])
     }
   }
 

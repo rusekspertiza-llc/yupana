@@ -30,8 +30,9 @@ import org.yupana.api.schema._
 import org.yupana.core.TsdbConfig
 import org.yupana.core.dao.DictionaryProvider
 import org.yupana.core.model.UpdateInterval
+import org.yupana.core.utils.Explanation.Explained
 import org.yupana.core.utils.metric.MetricQueryCollector
-import org.yupana.core.utils.{ CloseableIterator, CollectionUtils, QueryUtils }
+import org.yupana.core.utils.{ CloseableIterator, CollectionUtils, Explanation, QueryUtils }
 
 import java.nio.ByteBuffer
 import java.time.temporal.TemporalAdjusters
@@ -160,7 +161,7 @@ object HBaseUtils extends StrictLogging {
       toTime: Long,
       startRowKey: Option[Array[Byte]] = None,
       endRowKey: Option[Array[Byte]] = None
-  ): Option[Scan] = {
+  ): Explained[Option[Scan]] = {
 
     logger.trace(s"Create range scan for ${multiRowRangeFilter.map(_.getRowRanges.size())} ranges")
 
@@ -197,8 +198,28 @@ object HBaseUtils extends StrictLogging {
       filter.foreach(scan.setFilter)
 
       familiesQueried(queryContext).foreach(f => scan.addFamily(HBaseUtils.family(f)))
-      Some(scan)
-    } else None
+      val e = Explanation.of(
+        Explanation(Explanation.DAO, s"HBase Scan ${Bytes.toHex(startKey)} -- ${Bytes.toHex(stopKey)}"),
+        Some(scan)
+      )
+
+      val mrm = multiRowRangeFilter
+        .map { m =>
+          val total = e.tell(Explanation(Explanation.DAO, s"   ${m.getRowRanges.size()} ranges in the scan"))
+          m.getRowRanges.asScala.foldLeft(total)((a, r) =>
+            a.tell(
+              Explanation(
+                Explanation.DAO,
+                s"    Range: ${Bytes.toHex(r.getStartRow)} -- ${Bytes.toHex(r.getStopRow)}",
+                trace = true
+              )
+            )
+          )
+        }
+        .getOrElse(e)
+
+      hbaseFuzzyRowFilter.foldLeft(mrm)((a, frf) => a.tell(Explanation(Explanation.DAO, s"    Fuzzy: $frf")))
+    } else Explanation.of(None)
   }
 
   def executeScan(
