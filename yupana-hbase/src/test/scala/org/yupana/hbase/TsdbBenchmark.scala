@@ -19,6 +19,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.yupana.cache.CacheFactory
 import org.yupana.core.model.UpdateInterval
+import org.yupana.core.utils.Explanation
+import org.yupana.core.utils.Explanation.Explained
 import org.yupana.metrics.Slf4jMetricReporter
 import org.yupana.settings.Settings
 
@@ -137,8 +139,8 @@ class TsdbBenchmark extends AnyFlatSpec with Matchers {
           queryContext: InternalQueryContext,
           itnervals: Seq[(Long, Long)],
           rangeScanDims: Iterator[Map[Dimension, Seq[_]]]
-      ): Iterator[HResult] = {
-        rows.iterator
+      ): Explained[Iterator[HResult]] = {
+        Explanation.of(rows.iterator)
       }
 
 //      var c = 0

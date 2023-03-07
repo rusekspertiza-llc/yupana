@@ -21,6 +21,8 @@ import scala.jdk.CollectionConverters._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import org.yupana.cache.CacheFactory
+import org.yupana.core.utils.Explanation
+import org.yupana.core.utils.Explanation.Explained
 import org.yupana.settings.Settings
 import org.yupana.utils.RussianTokenizer
 
@@ -148,6 +150,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res.size shouldEqual 1
@@ -184,6 +188,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res.size shouldEqual 1
@@ -228,6 +234,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res.size shouldEqual 1
@@ -271,6 +279,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res.size shouldEqual 2
@@ -318,6 +328,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res.size shouldEqual 1
@@ -365,6 +377,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res.size shouldEqual 1
@@ -440,6 +454,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res.size shouldEqual 2
@@ -469,6 +485,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res shouldBe empty
@@ -583,6 +601,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res should have size 4
@@ -649,6 +669,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res should have size 2
@@ -707,6 +729,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res should have size 2
@@ -824,6 +848,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     results should have size 1
@@ -850,6 +876,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     results shouldBe empty
@@ -904,6 +932,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res.size shouldEqual 2
@@ -956,6 +986,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     results should have size 1
@@ -1005,6 +1037,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res.size shouldEqual 1
@@ -1067,6 +1101,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res.size shouldEqual 1
@@ -1118,6 +1154,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res should have size 1
@@ -1167,6 +1205,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res should have size 1
@@ -1241,6 +1281,8 @@ class TSDaoHBaseTest
         valueDataBuilder,
         NoMetricCollector
       )
+      .run
+      ._2
       .toList
 
     res should have size 4
@@ -1285,22 +1327,25 @@ class TSDaoHBaseTest
         )
       )
 
-    val res = dao.query(
-      InternalQuery(
-        testTable,
-        exprs.toSet,
-        and(
-          ge(time, const(Time(from))),
-          lt(time, const(Time(to))),
-          or(
-            equ(dimension(TestDims.DIM_A), const("foo")),
-            in(dimension(TestDims.DIM_A), Set("bar", "baz"))
+    val res = dao
+      .query(
+        InternalQuery(
+          testTable,
+          exprs.toSet,
+          and(
+            ge(time, const(Time(from))),
+            lt(time, const(Time(to))),
+            or(
+              equ(dimension(TestDims.DIM_A), const("foo")),
+              in(dimension(TestDims.DIM_A), Set("bar", "baz"))
+            )
           )
-        )
-      ),
-      builder,
-      NoMetricCollector
-    )
+        ),
+        builder,
+        NoMetricCollector
+      )
+      .run
+      ._2
 
     res should have size 1
   }
@@ -1332,22 +1377,25 @@ class TSDaoHBaseTest
         )
       )
 
-    val res = dao.query(
-      InternalQuery(
-        testTable,
-        exprs.toSet,
-        and(
-          ge(time, const(Time(from))),
-          lt(time, const(Time(to))),
-          or(
-            neq(dimension(TestDims.DIM_A), const("foo")),
-            notIn(dimension(TestDims.DIM_A), Set("foo", "bar"))
+    val res = dao
+      .query(
+        InternalQuery(
+          testTable,
+          exprs.toSet,
+          and(
+            ge(time, const(Time(from))),
+            lt(time, const(Time(to))),
+            or(
+              neq(dimension(TestDims.DIM_A), const("foo")),
+              notIn(dimension(TestDims.DIM_A), Set("foo", "bar"))
+            )
           )
-        )
-      ),
-      builder,
-      NoMetricCollector
-    )
+        ),
+        builder,
+        NoMetricCollector
+      )
+      .run
+      ._2
 
     res should have size 1
   }
@@ -1395,21 +1443,24 @@ class TSDaoHBaseTest
         )
       )
 
-    val res = dao.query(
-      InternalQuery(
-        testTable,
-        exprs.toSet,
-        and(
-          equ(dimension(TestDims.DIM_A), const("foo")),
-          or(
-            and(ge(time, const(Time(from1))), lt(time, const(Time(to1)))),
-            and(ge(time, const(Time(from2))), lt(time, const(Time(to2))))
+    val res = dao
+      .query(
+        InternalQuery(
+          testTable,
+          exprs.toSet,
+          and(
+            equ(dimension(TestDims.DIM_A), const("foo")),
+            or(
+              and(ge(time, const(Time(from1))), lt(time, const(Time(to1)))),
+              and(ge(time, const(Time(from2))), lt(time, const(Time(to2))))
+            )
           )
-        )
-      ),
-      builder,
-      NoMetricCollector
-    )
+        ),
+        builder,
+        NoMetricCollector
+      )
+      .run
+      ._2
 
     res.toList.map(r => r.get[Time](0)) should have size 2
   }
@@ -1423,15 +1474,15 @@ class TSDaoHBaseTest
         queryContext: InternalQueryContext,
         intervals: Seq[(Long, Long)],
         rangeScanDims: Iterator[Map[Dimension, Seq[_]]]
-    ): Iterator[HResult] = {
+    ): Explained[Iterator[HResult]] = {
       val scans = rangeScanDims.flatMap { dimIds =>
         intervals.flatMap {
           case (from, to) =>
             val filter = HBaseUtils.multiRowRangeFilter(queryContext.table, from, to, dimIds)
-            HBaseUtils.createScan(queryContext, filter, Seq.empty, from, to)
+            HBaseUtils.createScan(queryContext, filter, Seq.empty, from, to).run._2
         }
       }
-      queryRunner(scans.toSeq)
+      Explanation.of(queryRunner(scans.toSeq))
     }
 
     override val schema: Schema = TestSchema.schema
