@@ -24,7 +24,8 @@ import org.yupana.api.types.{ BoxingTag, DataType }
 import org.yupana.cache.{ Cache, CacheFactory }
 import org.yupana.core.ExternalLinkService
 import org.yupana.core.model.InternalRow
-import org.yupana.core.utils.{ FlatAndCondition, SparseTable, Table }
+import org.yupana.core.utils.Explanation.Explained
+import org.yupana.core.utils.{ Explanation, FlatAndCondition, SparseTable, Table }
 import org.yupana.externallinks.ExternalLinkUtils
 import org.yupana.externallinks.universal.JsonCatalogs.SQLExternalLinkDescription
 import org.yupana.schema.externallinks.ExternalLinks._
@@ -65,7 +66,7 @@ class SQLSourcedExternalLinkService[DimensionValue](
     )
   }
 
-  override def transformCondition(condition: FlatAndCondition): Seq[ConditionTransformation] = {
+  override def transformCondition(condition: FlatAndCondition): Explained[Seq[ConditionTransformation]] = {
     ExternalLinkUtils.transformConditionT[String](
       externalLink.linkName,
       condition,
@@ -74,40 +75,52 @@ class SQLSourcedExternalLinkService[DimensionValue](
     )
   }
 
-  private def includeTransform(values: Seq[(SimpleCondition, String, Set[String])]): Seq[ConditionTransformation] = {
-    val dimValues = dimValuesForFieldsValues(values, "AND").filter(x => x != null)
-    if (externalLink.dimension.dataType == DataType[String]) {
-      ConditionTransformation.replace(
-        values.map(_._1).distinct,
-        in(
-          lower(dimension(externalLink.dimension.asInstanceOf[Dimension.Aux[String]])),
-          dimValues.asInstanceOf[Set[String]]
-        )
-      )
-    } else {
-      ConditionTransformation.replace(
-        values.map(_._1).distinct,
-        in(dimension(externalLink.dimension.aux), dimValues)
-      )
-    }
+  private def includeTransform(
+      values: Seq[(SimpleCondition, String, Set[String])]
+  ): Explained[Seq[ConditionTransformation]] = {
+    dimValuesForFieldsValues(values, "AND")
+      .map(_.filter(x => x != null))
+      .describe(vs => Explanation(linkName, s"Include ${vs.size} $dimensionName"))
+      .map { dimValues =>
+        if (externalLink.dimension.dataType == DataType[String]) {
+          ConditionTransformation.replace(
+            values.map(_._1).distinct,
+            in(
+              lower(dimension(externalLink.dimension.asInstanceOf[Dimension.Aux[String]])),
+              dimValues.asInstanceOf[Set[String]]
+            )
+          )
+        } else {
+          ConditionTransformation.replace(
+            values.map(_._1).distinct,
+            in(dimension(externalLink.dimension.aux), dimValues)
+          )
+        }
+      }
   }
 
-  private def excludeTransform(values: Seq[(SimpleCondition, String, Set[String])]): Seq[ConditionTransformation] = {
-    val dimValues = dimValuesForFieldsValues(values, "OR").filter(x => x != null)
-    if (externalLink.dimension.dataType == DataType[String]) {
-      ConditionTransformation.replace(
-        values.map(_._1).distinct,
-        notIn(
-          lower(dimension(externalLink.dimension.asInstanceOf[Dimension.Aux[String]])),
-          dimValues.asInstanceOf[Set[String]]
-        )
-      )
-    } else {
-      ConditionTransformation.replace(
-        values.map(_._1).distinct,
-        notIn(dimension(externalLink.dimension.aux), dimValues)
-      )
-    }
+  private def excludeTransform(
+      values: Seq[(SimpleCondition, String, Set[String])]
+  ): Explained[Seq[ConditionTransformation]] = {
+    dimValuesForFieldsValues(values, "OR")
+      .map(_.filter(x => x != null))
+      .describe(vs => Explanation(linkName, s"Exclude ${vs.size} $dimensionName"))
+      .map { dimValues =>
+        if (externalLink.dimension.dataType == DataType[String]) {
+          ConditionTransformation.replace(
+            values.map(_._1).distinct,
+            notIn(
+              lower(dimension(externalLink.dimension.asInstanceOf[Dimension.Aux[String]])),
+              dimValues.asInstanceOf[Set[String]]
+            )
+          )
+        } else {
+          ConditionTransformation.replace(
+            values.map(_._1).distinct,
+            notIn(dimension(externalLink.dimension.aux), dimValues)
+          )
+        }
+      }
   }
 
   private def catalogFieldToSqlField(cf: FieldName): String = mapping.flatMap(_.get(cf)).getOrElse(camelToSnake(cf))
@@ -178,14 +191,17 @@ class SQLSourcedExternalLinkService[DimensionValue](
   private def dimValuesForFieldsValues(
       fieldsValues: Seq[(Condition, FieldName, Set[FieldValue])],
       joiningOperator: String
-  ): Set[DimensionValue] = {
+  ): Explained[Set[DimensionValue]] = {
     val q = tagsByFieldsQuery(fieldsValues, joiningOperator)
     val params = fieldsValues.flatMap(_._3).map(_.asInstanceOf[Object])
     logger.debug(s"Query for dimensions for catalog $linkName: $q with params: $params")
-    JdbcUtils
-      .runQuery(dataSource, q, Set(camelToSnake(dimensionName)), params)
-      .flatMap(_.values.map(_.asInstanceOf[DimensionValue]))
-      .toSet
+    Explanation.of(
+      Explanation(linkName, s"Get field values: $q", trace = true),
+      JdbcUtils
+        .runQuery(dataSource, q, Set(camelToSnake(dimensionName)), params)
+        .flatMap(_.values.map(_.asInstanceOf[DimensionValue]))
+        .toSet
+    )
   }
 }
 

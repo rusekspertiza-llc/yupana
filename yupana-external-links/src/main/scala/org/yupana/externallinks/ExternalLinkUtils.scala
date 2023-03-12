@@ -22,7 +22,8 @@ import org.yupana.api.query._
 import org.yupana.api.schema.ExternalLink
 import org.yupana.api.utils.ConditionMatchers._
 import org.yupana.core.model.{ InternalRow, TimeSensitiveFieldValues }
-import org.yupana.core.utils.{ CollectionUtils, Table, FlatAndCondition }
+import org.yupana.core.utils.Explanation.Explained
+import org.yupana.core.utils.{ CollectionUtils, Explanation, FlatAndCondition, Table }
 
 import scala.collection.mutable
 
@@ -108,9 +109,9 @@ object ExternalLinkUtils {
   def transformConditionT[T](
       linkName: String,
       tbc: FlatAndCondition,
-      includeExpression: Seq[(SimpleCondition, String, Set[T])] => Seq[ConditionTransformation],
-      excludeExpression: Seq[(SimpleCondition, String, Set[T])] => Seq[ConditionTransformation]
-  ): Seq[ConditionTransformation] = {
+      includeExpression: Seq[(SimpleCondition, String, Set[T])] => Explained[Seq[ConditionTransformation]],
+      excludeExpression: Seq[(SimpleCondition, String, Set[T])] => Explained[Seq[ConditionTransformation]]
+  ): Explained[Seq[ConditionTransformation]] = {
     transformCondition(
       linkName,
       tbc,
@@ -126,24 +127,24 @@ object ExternalLinkUtils {
   def transformCondition(
       linkName: String,
       tbc: FlatAndCondition,
-      includeTransform: Seq[(SimpleCondition, String, Set[Any])] => Seq[ConditionTransformation],
-      excludeTransform: Seq[(SimpleCondition, String, Set[Any])] => Seq[ConditionTransformation]
-  ): Seq[ConditionTransformation] = {
+      includeTransform: Seq[(SimpleCondition, String, Set[Any])] => Explained[Seq[ConditionTransformation]],
+      excludeTransform: Seq[(SimpleCondition, String, Set[Any])] => Explained[Seq[ConditionTransformation]]
+  ): Explained[Seq[ConditionTransformation]] = {
     val (includeExprValues, excludeExprValues, _) = extractCatalogFields(tbc, linkName)
 
     val include = if (includeExprValues.nonEmpty) {
       includeTransform(includeExprValues)
     } else {
-      Seq.empty
+      Explanation.of(Seq.empty)
     }
 
     val exclude = if (excludeExprValues.nonEmpty) {
       excludeTransform(excludeExprValues)
     } else {
-      Seq.empty
+      Explanation.of(Seq.empty)
     }
 
-    include ++ exclude
+    include.flatMap(i => exclude.map(e => i ++ e))
   }
 
   def setLinkedValues[R](

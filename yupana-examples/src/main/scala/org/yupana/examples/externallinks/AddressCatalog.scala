@@ -20,7 +20,8 @@ import org.yupana.api.query._
 import org.yupana.api.schema.{ Dimension, ExternalLink, LinkField, Schema }
 import org.yupana.core.ExternalLinkService
 import org.yupana.core.model.InternalRow
-import org.yupana.core.utils.{ CollectionUtils, SparseTable, Table, FlatAndCondition }
+import org.yupana.core.utils.Explanation.Explained
+import org.yupana.core.utils.{ CollectionUtils, Explanation, FlatAndCondition, SparseTable, Table }
 import org.yupana.externallinks.ExternalLinkUtils
 import org.yupana.schema.Dimensions
 
@@ -72,7 +73,7 @@ class AddressCatalogImpl(override val schema: Schema, override val externalLink:
     )
   }
 
-  override def transformCondition(condition: FlatAndCondition): Seq[ConditionTransformation] = {
+  override def transformCondition(condition: FlatAndCondition): Explained[Seq[ConditionTransformation]] = {
     ExternalLinkUtils.transformCondition(
       externalLink.linkName,
       condition,
@@ -92,21 +93,31 @@ class AddressCatalogImpl(override val schema: Schema, override val externalLink:
     }
   }
 
-  private def includeTransform(values: Seq[(SimpleCondition, String, Set[Any])]): Seq[ConditionTransformation] = {
+  private def includeTransform(
+      values: Seq[(SimpleCondition, String, Set[Any])]
+  ): Explained[Seq[ConditionTransformation]] = {
     val ids = idsForValues(values)
     val dimValues = CollectionUtils.intersectAll(ids)
-    ConditionTransformation.replace(
-      values.map(_._1),
-      in(dimension(externalLink.dimension.aux), dimValues)
+    Explanation.of(
+      Explanation(externalLink.linkName, s"Include ${dimValues.size} ${externalLink.dimension}"),
+      ConditionTransformation.replace(
+        values.map(_._1),
+        in(dimension(externalLink.dimension.aux), dimValues)
+      )
     )
   }
 
-  private def excludeTransform(values: Seq[(SimpleCondition, String, Set[Any])]): Seq[ConditionTransformation] = {
+  private def excludeTransform(
+      values: Seq[(SimpleCondition, String, Set[Any])]
+  ): Explained[Seq[ConditionTransformation]] = {
     val ids = idsForValues(values)
     val dimValues = ids.fold(Set.empty)(_ union _)
-    ConditionTransformation.replace(
-      values.map(_._1),
-      notIn(dimension(externalLink.dimension.aux), dimValues)
+    Explanation.of(
+      Explanation(externalLink.linkName, s"Exclude ${dimValues.size} ${externalLink.dimension}"),
+      ConditionTransformation.replace(
+        values.map(_._1),
+        notIn(dimension(externalLink.dimension.aux), dimValues)
+      )
     )
   }
 

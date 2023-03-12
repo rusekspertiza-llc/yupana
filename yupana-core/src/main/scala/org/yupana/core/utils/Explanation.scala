@@ -22,6 +22,7 @@ object Explanation {
   type Explained[T] = Writer[Explanation, T]
 
   val DAO: String = "DAO"
+  val CORE: String = "CORE"
 
   def of[T](t: T): Explained[T] = Writer(t)
 

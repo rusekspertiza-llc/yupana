@@ -21,7 +21,8 @@ import org.yupana.api.query._
 import org.yupana.api.schema.ExternalLink
 import org.yupana.core.ExternalLinkService
 import org.yupana.core.model.{ InternalRow, InternalRowBuilder }
-import org.yupana.core.utils.FlatAndCondition
+import org.yupana.core.utils.Explanation.Explained
+import org.yupana.core.utils.{ Explanation, FlatAndCondition }
 import org.yupana.externallinks.ExternalLinkUtils
 
 abstract class InMemoryExternalLinkBase[T <: ExternalLink](orderedFields: Seq[String], data: Array[Array[String]])
@@ -89,7 +90,7 @@ abstract class InMemoryExternalLinkBase[T <: ExternalLink](orderedFields: Seq[St
     }
   }
 
-  override def transformCondition(condition: FlatAndCondition): Seq[ConditionTransformation] = {
+  override def transformCondition(condition: FlatAndCondition): Explained[Seq[ConditionTransformation]] = {
     ExternalLinkUtils.transformConditionT[String](
       externalLink.linkName,
       condition,
@@ -98,14 +99,24 @@ abstract class InMemoryExternalLinkBase[T <: ExternalLink](orderedFields: Seq[St
     )
   }
 
-  private def includeTransform(values: Seq[(SimpleCondition, String, Set[String])]): Seq[ConditionTransformation] = {
+  private def includeTransform(
+      values: Seq[(SimpleCondition, String, Set[String])]
+  ): Explained[Seq[ConditionTransformation]] = {
     val keyValues = keyValuesForFieldValues(values, _ intersect _)
-    ConditionTransformation.replace(values.map(_._1), in(lower(keyExpr), keyValues))
+    Explanation.of(
+      Explanation(externalLink.linkName, s"Include ${keyValues.size} ${externalLink.dimension} values"),
+      ConditionTransformation.replace(values.map(_._1), in(lower(keyExpr), keyValues))
+    )
   }
 
-  private def excludeTransform(values: Seq[(SimpleCondition, String, Set[String])]): Seq[ConditionTransformation] = {
+  private def excludeTransform(
+      values: Seq[(SimpleCondition, String, Set[String])]
+  ): Explained[Seq[ConditionTransformation]] = {
     val keyValues = keyValuesForFieldValues(values, _ union _)
-    ConditionTransformation.replace(values.map(_._1), notIn(lower(keyExpr), keyValues))
+    Explanation.of(
+      Explanation(externalLink.linkName, s"Exclude ${keyValues.size} ${externalLink.dimension} values"),
+      ConditionTransformation.replace(values.map(_._1), notIn(lower(keyExpr), keyValues))
+    )
   }
 
   private def keyValuesForFieldValues(

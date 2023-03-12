@@ -72,7 +72,7 @@ class ItemsInvertedIndexImplTest
       ).head
     )
 
-    actual should contain theSameElementsAs Seq(
+    actual.run._2 should contain theSameElementsAs Seq(
       RemoveCondition(c1),
       AddCondition(
         DimIdInExpr(Dimensions.ITEM, si("колбаса вареная", "колбаса вареная молочная", "щупальца кальмара"))
@@ -111,7 +111,7 @@ class ItemsInvertedIndexImplTest
       ).head
     )
 
-    inside(res) {
+    inside(res.run._2) {
       case Seq(RemoveCondition(_), AddCondition(DimIdInExpr(d, vs))) =>
         d shouldEqual Dimensions.ITEM
         vs.toList should contain theSameElementsInOrderAs si(
@@ -139,7 +139,7 @@ class ItemsInvertedIndexImplTest
       ).head
     )
 
-    inside(res) {
+    inside(res.run._2) {
       case Seq(RemoveCondition(_), AddCondition(DimIdNotInExpr(d, vs))) =>
         d shouldEqual Dimensions.ITEM
         vs.toSeq should contain theSameElementsInOrderAs si("сигареты винстон", "сигареты бонд").toList

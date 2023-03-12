@@ -403,9 +403,11 @@ class TsdbDataFilterTest
         )
       )
       .returning(
-        ConditionTransformation.replace(
-          Seq(c),
-          in(dimension(TestDims.DIM_A), Set("test1"))
+        Explanation.of(
+          ConditionTransformation.replace(
+            Seq(c),
+            in(dimension(TestDims.DIM_A), Set("test1"))
+          )
         )
       )
 
@@ -482,7 +484,7 @@ class TsdbDataFilterTest
 
     (testCatalogServiceMock.transformCondition _)
       .expects(FlatAndCondition.single(calculator, condition))
-      .returning(Seq.empty)
+      .returning(Explanation.of(Seq.empty))
 
     (testCatalogServiceMock.setLinkedValues _)
       .expects(*, *, Set(link(TestLinks.TEST_LINK, "testField")).asInstanceOf[Set[LinkExpr[_]]])
@@ -554,7 +556,7 @@ class TsdbDataFilterTest
 
     (testCatalogServiceMock.transformCondition _)
       .expects(FlatAndCondition.single(calculator, condition))
-      .returning(Seq.empty)
+      .returning(Explanation.of(Seq.empty))
 
     (testCatalogServiceMock.setLinkedValues _)
       .expects(*, *, Set(link(TestLinks.TEST_LINK, "testField")).asInstanceOf[Set[LinkExpr[_]]])
@@ -636,11 +638,11 @@ class TsdbDataFilterTest
 
       (testCatalogServiceMock.transformCondition _)
         .expects(FlatAndCondition.single(calculator, condition))
-        .returning(Seq.empty)
+        .returning(Explanation.of(Seq.empty))
 
       (testCatalogServiceMock2.transformCondition _)
         .expects(FlatAndCondition.single(calculator, condition))
-        .returning(Seq.empty)
+        .returning(Explanation.of(Seq.empty))
 
       (testCatalogServiceMock.setLinkedValues _)
         .expects(*, *, Set(link(TestLinks.TEST_LINK, "testField")).asInstanceOf[Set[LinkExpr[_]]])
@@ -747,9 +749,11 @@ class TsdbDataFilterTest
         )
       )
       .returning(
-        ConditionTransformation.replace(
-          Seq(c),
-          in(lower(dimension(TestDims.DIM_A)), Set("test1a", "test2a"))
+        Explanation.of(
+          ConditionTransformation.replace(
+            Seq(c),
+            in(lower(dimension(TestDims.DIM_A)), Set("test1a", "test2a"))
+          )
         )
       )
 
@@ -856,7 +860,7 @@ class TsdbDataFilterTest
         }
       )
 
-    (link5.transformCondition _).expects(*).onCall((c: FlatAndCondition) => Seq.empty)
+    (link5.transformCondition _).expects(*).onCall((c: FlatAndCondition) => Explanation.of(Seq.empty))
 
     val rows = tsdb.query(query).toList
 

@@ -7,11 +7,12 @@ import org.yupana.api.query._
 import org.yupana.api.query.Expression.Condition
 import org.yupana.core.ConstantCalculator
 import org.yupana.core.model.InternalRowBuilder
-import org.yupana.core.utils.{ FlatAndCondition, SparseTable, Table }
+import org.yupana.core.utils.{ Explanation, FlatAndCondition, SparseTable, Table, Writer }
 import org.yupana.schema.externallinks.ItemsInvertedIndex
 import org.yupana.utils.RussianTokenizer
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.yupana.core.utils.Explanation.Explained
 
 import java.time.LocalDateTime
 
@@ -27,26 +28,37 @@ class ExternalLinkUtilsTest extends AnyFlatSpec with Matchers with MockFactory w
     val t2 = t1.plusDays(1)
     val c = and(ge(time, const(Time(t1))), lt(time, const(Time(t2))), condition)
     val tbcs = FlatAndCondition(calculator, c)
-    tbcs.flatMap(tbc =>
-      ExternalLinkUtils.transformConditionT[String](TestLink.linkName, tbc, includeTransform, excludeTransform)
+    Writer
+      .flatTraverseList(tbcs.toList)(tbc =>
+        ExternalLinkUtils.transformConditionT[String](TestLink.linkName, tbc, includeTransform, excludeTransform)
+      )
+      .run
+      ._2
+  }
+
+  private def includeTransform(
+      values: Seq[(SimpleCondition, String, Set[String])]
+  ): Explained[Seq[ConditionTransformation]] = {
+    Explanation.of(
+      ConditionTransformation.replace(
+        values.map(_._1),
+        values.map {
+          case (_, field, vs) => in[String](dimension(xDim), vs.map(v => field + "_" + v))
+        }
+      )
     )
   }
 
-  private def includeTransform(values: Seq[(SimpleCondition, String, Set[String])]): Seq[ConditionTransformation] = {
-    ConditionTransformation.replace(
-      values.map(_._1),
-      values.map {
-        case (_, field, vs) => in[String](dimension(xDim), vs.map(v => field + "_" + v))
-      }
-    )
-  }
-
-  private def excludeTransform(values: Seq[(SimpleCondition, String, Set[String])]): Seq[ConditionTransformation] = {
-    ConditionTransformation.replace(
-      values.map(_._1),
-      values.map {
-        case (_, field, vs) => notIn(dimension(xDim), vs.map(v => field + "_" + v))
-      }
+  private def excludeTransform(
+      values: Seq[(SimpleCondition, String, Set[String])]
+  ): Explained[Seq[ConditionTransformation]] = {
+    Explanation.of(
+      ConditionTransformation.replace(
+        values.map(_._1),
+        values.map {
+          case (_, field, vs) => notIn(dimension(xDim), vs.map(v => field + "_" + v))
+        }
+      )
     )
   }
 

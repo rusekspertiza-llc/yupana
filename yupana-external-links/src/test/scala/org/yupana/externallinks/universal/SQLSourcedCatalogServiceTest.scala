@@ -100,7 +100,7 @@ class SQLSourcedCatalogServiceTest
         )
       ).head
     )
-    inCondition should contain theSameElementsAs Seq(
+    inCondition.run._2 should contain theSameElementsAs Seq(
       RemoveCondition(c1),
       RemoveCondition(c1_2),
       AddCondition(in(dimension(externalLink.dimension.aux), Set(12345654)))
@@ -120,7 +120,7 @@ class SQLSourcedCatalogServiceTest
       ).head
     )
 
-    notInCondition should contain theSameElementsAs Seq(
+    notInCondition.run._2 should contain theSameElementsAs Seq(
       RemoveCondition(c2),
       RemoveCondition(c2_2),
       AddCondition(
@@ -189,7 +189,7 @@ class SQLSourcedCatalogServiceTest
       ).head
     )
 
-    inCondition should contain theSameElementsAs Seq(
+    inCondition.run._2 should contain theSameElementsAs Seq(
       RemoveCondition(c1),
       RemoveCondition(c1_2),
       AddCondition(in(dimension(externalLink.dimension.aux), Set(12345657)))
@@ -209,7 +209,7 @@ class SQLSourcedCatalogServiceTest
       ).head
     )
 
-    notInCondition should contain theSameElementsAs Seq(
+    notInCondition.run._2 should contain theSameElementsAs Seq(
       RemoveCondition(c2),
       RemoveCondition(c2_2),
       AddCondition(

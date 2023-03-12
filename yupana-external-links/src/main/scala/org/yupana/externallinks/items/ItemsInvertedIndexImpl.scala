@@ -23,7 +23,8 @@ import org.yupana.api.utils.SortedSetIterator
 import org.yupana.core.ExternalLinkService
 import org.yupana.core.dao.InvertedIndexDao
 import org.yupana.core.model.InternalRow
-import org.yupana.core.utils.FlatAndCondition
+import org.yupana.core.utils.Explanation.Explained
+import org.yupana.core.utils.{ Explanation, FlatAndCondition }
 import org.yupana.externallinks.ExternalLinkUtils
 import org.yupana.schema.externallinks.ItemsInvertedIndex
 import org.yupana.schema.{ Dimensions, ItemDimension }
@@ -84,16 +85,20 @@ class ItemsInvertedIndexImpl(
     invertedIndexDao.valuesByPrefix(prefix)
   }
 
-  private def includeTransform(values: Seq[(SimpleCondition, String, Set[String])]): Seq[ConditionTransformation] = {
+  private def includeTransform(
+      values: Seq[(SimpleCondition, String, Set[String])]
+  ): Explained[Seq[ConditionTransformation]] = {
     val ids = getPhraseIds(values)
     val it = SortedSetIterator.intersectAll(ids)
-    ConditionTransformation.replace(values.map(_._1), DimIdInExpr(externalLink.dimension, it))
+    Explanation.of(ConditionTransformation.replace(values.map(_._1), DimIdInExpr(externalLink.dimension, it)))
   }
 
-  private def excludeTransform(values: Seq[(SimpleCondition, String, Set[String])]): Seq[ConditionTransformation] = {
+  private def excludeTransform(
+      values: Seq[(SimpleCondition, String, Set[String])]
+  ): Explained[Seq[ConditionTransformation]] = {
     val ids = getPhraseIds(values)
     val it = SortedSetIterator.unionAll(ids)
-    ConditionTransformation.replace(values.map(_._1), DimIdNotInExpr(externalLink.dimension, it))
+    Explanation.of(ConditionTransformation.replace(values.map(_._1), DimIdNotInExpr(externalLink.dimension, it)))
   }
 
   // Read only external link
@@ -103,7 +108,7 @@ class ItemsInvertedIndexImpl(
       exprs: Set[LinkExpr[_]]
   ): Unit = {}
 
-  override def transformCondition(condition: FlatAndCondition): Seq[ConditionTransformation] = {
+  override def transformCondition(condition: FlatAndCondition): Explained[Seq[ConditionTransformation]] = {
     ExternalLinkUtils.transformConditionT[String](
       externalLink.linkName,
       condition,
