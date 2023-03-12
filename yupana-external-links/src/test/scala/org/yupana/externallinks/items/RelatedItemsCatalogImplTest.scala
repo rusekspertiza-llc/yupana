@@ -151,7 +151,7 @@ class RelatedItemsCatalogImplTest extends AnyFlatSpec with Matchers with MockFac
       ).head
     )
 
-    conditions shouldEqual Seq(
+    conditions.run._2 shouldEqual Seq(
       RemoveCondition(c),
       AddCondition(
         in(
